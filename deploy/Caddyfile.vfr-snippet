@@ -1,0 +1,54 @@
+# VFR Website — fahrlehrer-portal.de
+#
+# Diesen Block an die bestehende /opt/clutch-it/Caddyfile anhängen
+# (vor oder nach dem clutch-it.de-Block, Reihenfolge egal).
+#
+# Nach dem Einfügen:
+#   docker exec clutch_caddy caddy reload --config /etc/caddy/Caddyfile
+#
+# Caddy holt Let's-Encrypt-Zertifikat automatisch, sobald die A-Records
+# von fahrlehrer-portal.de (und www.fahrlehrer-portal.de) auf 217.160.65.88 zeigen.
+#
+# Später vfr-gmbh.de ergänzen:
+#   vfr-gmbh.de, www.vfr-gmbh.de { ... selbe Logik ... }
+# ODER als Alias direkt mit in diesen Block:
+#   fahrlehrer-portal.de, www.fahrlehrer-portal.de, vfr-gmbh.de, www.vfr-gmbh.de { ... }
+
+fahrlehrer-portal.de {
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        -Server
+    }
+
+    # Bot-Scanner-Pfade sofort 404 (sonst liefert Next.js die SPA-Seite
+    # und Scanner werten das als Treffer)
+    @scanner {
+        path /wp-admin/* /wp-login.php /wp-content/* /wp-includes/* /xmlrpc.php /.env /.env.* /.git/* /.svn/* /credentials.json /config.php /phpinfo.php /.htaccess /.htpasswd
+    }
+    handle @scanner {
+        respond 404
+    }
+
+    # Komplette App geht an den Next.js-Container
+    reverse_proxy vfr_app:3000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    log {
+        output file /data/vfr-access.log {
+            roll_size 50mb
+            roll_keep 10
+        }
+        format json
+    }
+}
+
+www.fahrlehrer-portal.de {
+    redir https://fahrlehrer-portal.de{uri} permanent
+}

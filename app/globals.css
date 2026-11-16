@@ -1,0 +1,235 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Font-Stacks — beide Variablen zeigen auf Inter, damit alle bestehenden
+       font-serif-References automatisch zu Inter werden */
+    --font-serif: var(--font-sans);
+
+    --vfr-bg: #ffffff;
+    --vfr-bg-alt: #eff5fb;       /* leicht blaugetöntes Off-White */
+    --vfr-bg-blue: #e3edf6;
+    /* Nur noch zwei Blautöne:
+       --vfr-accent (Logo-/Button-Blau) für alle Akzente, Icons, Highlights, Links
+       --vfr-dark (dunkle Variante davon) für alle dunklen Flächen */
+    --vfr-accent: #1769a5;         /* Das Logo-R-Blau — Buttons, Icons, Highlights, Cards */
+    --vfr-accent-dark: #0f5890;    /* nur für Hover-States der Buttons */
+    --vfr-accent-light: #1769a5;
+    --vfr-dark: #1769a5;           /* Button-Blau als dunkle Variante — Topbar, Footer */
+    --vfr-topbar: #1769a5;         /* identisch zu --vfr-dark */
+    --vfr-bg-dark: #1769a5;
+    --vfr-fg: #0f2a40;
+    --vfr-fg-muted: #4a5a70;
+    --vfr-fg-soft: #8d9eb0;
+    --vfr-rule: #d7e3ef;
+    --vfr-gray: #9a9a9a;
+    --vfr-gray-dark: #6b6b6b;
+    --vfr-card: #ffffff;
+    /* Legacy */
+    --vfr-highlight: #1769a5;
+    --vfr-dark-alt: #0f5890;       /* leicht dunkler für Karten im Footer */
+    --vfr-dark-rule: #2c7eb2;      /* Trennlinien auf dunklem Blau */
+    --vfr-blue: #1769a5;
+    --vfr-blue-dark: #0f5890;
+    --vfr-gold: #1769a5;
+    --vfr-gold-dark: #0f5890;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--vfr-bg);
+    color: var(--vfr-fg);
+    font-family: var(--font-sans), "Inter", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-sans), "Inter", "Helvetica Neue", Arial, sans-serif;
+    color: var(--vfr-fg);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+  em {
+    font-style: italic;
+  }
+}
+
+@layer components {
+  .vfr-wrap {
+    width: 100%;
+    max-width: 1320px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: max(32px, env(safe-area-inset-left, 0px));
+    padding-right: max(32px, env(safe-area-inset-right, 0px));
+  }
+
+  .vfr-section {
+    padding-block: clamp(70px, 10vw, 110px);
+  }
+
+  .vfr-eyebrow {
+    display: inline-block;
+    font-family: var(--font-sans), "Inter", sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--vfr-accent);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+  .vfr-eyebrow::before { content: none; }
+  .vfr-eyebrow--gold { color: var(--vfr-highlight); }
+
+  .vfr-h1 {
+    font-family: var(--font-sans), "Inter", sans-serif;
+    font-size: clamp(40px, 6vw, 72px);
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+  .vfr-h1 em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--vfr-accent);
+  }
+  .vfr-h2 {
+    font-family: var(--font-sans), "Inter", sans-serif;
+    font-size: clamp(30px, 3.8vw, 44px);
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0 0 20px;
+  }
+
+  .vfr-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 14px 32px;
+    font-family: var(--font-sans), "Inter", sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.25s ease;
+    border-radius: 2px;
+  }
+  .vfr-btn--primary {
+    background: var(--vfr-accent);
+    color: #fff;
+    border-color: var(--vfr-accent);
+  }
+  .vfr-btn--primary:hover {
+    background: var(--vfr-accent-dark);
+    border-color: var(--vfr-accent-dark);
+  }
+  .vfr-btn--ghost {
+    background: transparent;
+    color: var(--vfr-fg);
+    border-color: var(--vfr-fg);
+  }
+  .vfr-btn--ghost:hover {
+    background: var(--vfr-fg);
+    color: #fff;
+  }
+  .vfr-btn--light {
+    background: transparent;
+    color: #fff;
+    border-color: #fff;
+  }
+  .vfr-btn--light:hover {
+    background: #fff;
+    color: var(--vfr-fg);
+  }
+  .vfr-btn--gold {
+    background: var(--vfr-highlight);
+    color: #fff;
+    border-color: var(--vfr-highlight);
+  }
+
+  /* Alte Klassen beibehalten */
+  .innersection {
+    @apply mx-auto px-5;
+    max-width: 1320px;
+    width: 93%;
+  }
+  .btn-vfr {
+    @apply inline-flex items-center justify-center;
+    background: var(--vfr-accent);
+    color: #fff;
+    padding: 14px 32px;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border: 1px solid var(--vfr-accent);
+    transition: all 0.25s ease;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  .btn-vfr:hover { background: var(--vfr-accent-dark); border-color: var(--vfr-accent-dark); }
+  .btn-gold {
+    @apply inline-flex items-center justify-center;
+    background: var(--vfr-highlight);
+    color: #fff;
+    padding: 14px 32px;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    transition: all 0.25s ease;
+    border-radius: 2px;
+  }
+  .btn-outline-vfr {
+    @apply inline-flex items-center justify-center;
+    background: transparent;
+    color: var(--vfr-accent);
+    border: 2px solid var(--vfr-accent);
+    padding: 12px 30px;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    transition: all 0.25s ease;
+    border-radius: 2px;
+  }
+  .btn-outline-vfr:hover { background: var(--vfr-accent); color: #fff; }
+
+  .bluetextcolor { color: var(--vfr-accent); font-weight: 600; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; }
+  .iconbefore {
+    @apply relative;
+    padding-left: 70px;
+  }
+  .iconbefore::before {
+    content: ""; position: absolute; left: 0; top: 50%; width: 50px; height: 2px;
+    background: var(--vfr-accent);
+  }
+  .h-big { font-size: clamp(40px, 6vw, 72px); line-height: 1.05; font-weight: 700; letter-spacing: -0.03em; }
+  .h-section { font-size: clamp(30px, 3.8vw, 44px); line-height: 1.15; font-weight: 600; letter-spacing: -0.02em; }
+  .bigtext { font-size: 17px; line-height: 1.6; color: var(--vfr-fg); font-weight: 400; }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+}
+
+@keyframes fadeInUpShort {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fadeInUpShort { animation: fadeInUpShort 0.7s ease-out both; }
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.vfr-pulse { animation: pulseDot 2s infinite; }

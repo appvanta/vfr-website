@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+.env
+.env.local
+.env*.local
+.env.production
+.env.staging
+# Ausnahme: die Vorlagen sollen committed werden
+!.env.example
+!.env.production.example
+.DS_Store
+*.log
+.vercel
+.turbo
+invoices/

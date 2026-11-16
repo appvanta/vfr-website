@@ -1,0 +1,69 @@
+# VFR Website — Produktions-Stack
+#
+# Läuft parallel zu Clutch-IT auf demselben Server. Eigene Container, eigene
+# Datenbank, eigener Vhost — bei Problemen in 30 Min woanders deploybar.
+#
+# Start:   docker compose up -d
+# Logs:    docker compose logs -f vfr_app
+# Stop:    docker compose down
+# Rebuild: docker compose up -d --build
+
+services:
+  vfr_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vfr-website:latest
+    container_name: vfr_app
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+    volumes:
+      # Rechnungs-PDFs persistent
+      - ./invoices:/app/invoices
+    networks:
+      - vfr_net
+      - clutch_net   # geteiltes Netz mit Caddy
+    depends_on:
+      vfr_postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3
+
+  vfr_postgres:
+    image: postgres:16-alpine
+    container_name: vfr_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vfr
+      POSTGRES_USER: vfr
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD muss in .env.production gesetzt sein}
+    volumes:
+      - vfr_pg_data:/var/lib/postgresql/data
+      - ./backup:/backup
+    networks:
+      - vfr_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vfr -d vfr"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  vfr_pg_data:
+    name: vfr_pg_data
+
+networks:
+  vfr_net:
+    name: vfr_net
+  clutch_net:
+    external: true
+    name: clutch-it_clutch_net
