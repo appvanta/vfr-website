@@ -628,8 +628,15 @@ export async function listCourses(filter?: {
   if (useMockData()) {
     courses = MOCK_COURSES;
   } else {
-    const data = await flarioFetch<{ courses: Course[] }>("/courses");
-    courses = data.courses;
+    try {
+      const data = await flarioFetch<{ courses: Course[] }>("/courses");
+      courses = data.courses ?? [];
+    } catch (err) {
+      // Flario kann vorübergehend nicht erreichbar sein (502/Timeout etc.)
+      // → leere Liste statt Build/Request-Crash. Die Website bleibt online.
+      console.warn("[flario] listCourses fehlgeschlagen:", (err as Error).message);
+      courses = [];
+    }
   }
 
   return courses
@@ -968,56 +975,74 @@ export type ChatSession = {
 // in Produktion übernimmt Flario die Persistenz).
 const MOCK_CHAT_SESSIONS = new Map<string, ChatSession>();
 
-/** Legt eine neue Chat-Session an bzw. bringt vorhandene zurück */
+function upsertChatSessionLocal(input: {
+  sessionId: string;
+  context?: ChatSession["context"];
+}): ChatSession {
+  const existing = MOCK_CHAT_SESSIONS.get(input.sessionId);
+  if (existing) {
+    existing.lastActivityAt = new Date().toISOString();
+    return existing;
+  }
+  const session: ChatSession = {
+    sessionId: input.sessionId,
+    startedAt: new Date().toISOString(),
+    lastActivityAt: new Date().toISOString(),
+    humanTakeover: false,
+    messages: [],
+    context: input.context,
+  };
+  MOCK_CHAT_SESSIONS.set(input.sessionId, session);
+  return session;
+}
+
+/** Legt eine neue Chat-Session an. Flario-Spiegelung ist best-effort —
+ *  wenn Flario den Endpoint nicht hat, läuft der Chat trotzdem. */
 export async function upsertChatSession(input: {
   sessionId: string;
   context?: ChatSession["context"];
 }): Promise<ChatSession> {
   if (useMockData()) {
-    const existing = MOCK_CHAT_SESSIONS.get(input.sessionId);
-    if (existing) {
-      existing.lastActivityAt = new Date().toISOString();
-      return existing;
-    }
-    const session: ChatSession = {
-      sessionId: input.sessionId,
-      startedAt: new Date().toISOString(),
-      lastActivityAt: new Date().toISOString(),
-      humanTakeover: false,
-      messages: [],
-      context: input.context,
-    };
-    MOCK_CHAT_SESSIONS.set(input.sessionId, session);
-    return session;
+    return upsertChatSessionLocal(input);
   }
-  return flarioFetch<ChatSession>(`/chat-sessions`, {
-    method: "POST",
-    body: JSON.stringify(input),
-    next: { revalidate: 0 },
-  });
+  try {
+    return await flarioFetch<ChatSession>(`/chat-sessions`, {
+      method: "POST",
+      body: JSON.stringify(input),
+      next: { revalidate: 0 },
+    });
+  } catch (err) {
+    // Flario-Endpoint existiert möglicherweise noch nicht → lokal fallback
+    console.warn("[flario] upsertChatSession fehlgeschlagen, nutze lokalen Fallback:", (err as Error).message);
+    return upsertChatSessionLocal(input);
+  }
 }
 
-/** Protokolliert Nachrichten (user, assistant) nach Flario */
+/** Protokolliert Nachrichten (user, assistant). Best-effort, silent bei Fehler. */
 export async function appendChatMessages(
   sessionId: string,
   messages: ChatMessage[],
 ): Promise<void> {
-  if (useMockData()) {
-    const s = MOCK_CHAT_SESSIONS.get(sessionId);
-    if (s) {
-      s.messages.push(...messages);
-      s.lastActivityAt = new Date().toISOString();
-    }
-    return;
+  // Lokaler Speicher wird immer gefüllt (für Polling-Fallback)
+  const s = MOCK_CHAT_SESSIONS.get(sessionId);
+  if (s) {
+    s.messages.push(...messages);
+    s.lastActivityAt = new Date().toISOString();
   }
-  await flarioFetch<unknown>(
-    `/chat-sessions/${encodeURIComponent(sessionId)}/messages`,
-    {
-      method: "POST",
-      body: JSON.stringify({ messages }),
-      next: { revalidate: 0 },
-    },
-  );
+  if (useMockData()) return;
+  try {
+    await flarioFetch<unknown>(
+      `/chat-sessions/${encodeURIComponent(sessionId)}/messages`,
+      {
+        method: "POST",
+        body: JSON.stringify({ messages }),
+        next: { revalidate: 0 },
+      },
+    );
+  } catch (err) {
+    // Flario-Endpoint fehlt → kein Problem, Chat funktioniert ohne Spiegelung weiter
+    console.warn("[flario] appendChatMessages fehlgeschlagen, ignoriere:", (err as Error).message);
+  }
 }
 
 /** Pollt Flario: gibt es neue Agent-Nachrichten / Takeover-Status? */
@@ -1038,10 +1063,15 @@ export async function pollChatSession(
   }
   const params = new URLSearchParams();
   if (sinceIso) params.set("since", sinceIso);
-  return flarioFetch<{ humanTakeover: boolean; newMessages: ChatMessage[] }>(
-    `/chat-sessions/${encodeURIComponent(sessionId)}/poll?${params.toString()}`,
-    { next: { revalidate: 0 } },
-  );
+  try {
+    return await flarioFetch<{ humanTakeover: boolean; newMessages: ChatMessage[] }>(
+      `/chat-sessions/${encodeURIComponent(sessionId)}/poll?${params.toString()}`,
+      { next: { revalidate: 0 } },
+    );
+  } catch {
+    // Kein Polling bei Flario verfügbar → still nothing to report
+    return { humanTakeover: false, newMessages: [] };
+  }
 }
 
 /** DEV-Helper: Agent-Nachricht simulieren (nur Mock-Modus) */

@@ -227,6 +227,8 @@ export default async function KlassePage({
 
       {k.cat === "ausbildung-be" && <NaechsteInfoVeranstaltung />}
 
+      {k.cat === "ausbildung-be" && <AusbildungAblauf />}
+
       {/* Impressionen-Teaser — Text links, Bilder-Collage rechts */}
       <section className="vfr-section" style={{ paddingBlock: "60px" }}>
         <div className="vfr-wrap grid lg:grid-cols-[1fr_1.3fr] gap-10 lg:gap-14 items-center">
@@ -1080,8 +1082,6 @@ export default async function KlassePage({
           </div>
         </section>
       )}
-
-      {k.cat === "ausbildung-be" && <AusbildungAblauf />}
 
       <FAQ
         entries={faqByTopicStrict(k.cat as FaqTopic, "buchung-zahlung")}

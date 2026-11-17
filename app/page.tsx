@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Hero } from "@/components/Hero";
 import { BeHighlight } from "@/components/BeHighlight";
 import { Foerderung } from "@/components/Foerderung";
+import { SoLaeuftEsAb } from "@/components/SoLaeuftEsAb";
 import { Quickstart } from "@/components/Quickstart";
 import { WarumVfr } from "@/components/WarumVfr";
 import { PersoenlicheBetreuung } from "@/components/PersoenlicheBetreuung";
@@ -25,6 +26,7 @@ export default function HomePage() {
       <Hero />
       <BeHighlight />
       <Foerderung />
+      <SoLaeuftEsAb />
       <Quickstart />
       <WarumVfr />
       <PersoenlicheBetreuung />

@@ -15,7 +15,9 @@ const heroSlides = [
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden" style={{ height: "50vh", minHeight: 380 }}>
+    <section
+      className="relative overflow-hidden min-h-[640px] md:min-h-[460px] lg:min-h-[380px] lg:h-[50vh]"
+    >
       <HeroSlideshow slides={heroSlides} />
       <div
         className="absolute inset-0 z-10"
@@ -90,26 +92,35 @@ export function Hero() {
                 </span>
               </Link>
 
-              <div className="mt-6 flex flex-wrap items-center gap-6">
+              <div className="mt-6 flex flex-wrap items-center gap-4">
                 <Link
                   href="/termine-preise"
-                  className="inline-flex items-center gap-2 hover:gap-3 transition-all"
+                  className="inline-flex items-center gap-2 hover:gap-3 transition-all no-underline"
                   style={{
-                    color: "rgba(255,255,255,0.9)",
+                    color: "#fff",
                     fontSize: 13,
-                    fontWeight: 500,
+                    fontWeight: 600,
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
-                    borderBottom: "1px solid rgba(255,255,255,0.4)",
-                    paddingBottom: 4,
+                    background: "rgba(0, 0, 0, 0.55)",
+                    backdropFilter: "blur(6px)",
+                    WebkitBackdropFilter: "blur(6px)",
+                    border: "1px solid rgba(255,255,255,0.35)",
+                    padding: "10px 18px",
+                    borderRadius: 999,
                   }}
                 >
                   Alle Kurse ansehen →
                 </Link>
                 <span
                   style={{
-                    color: "rgba(255,255,255,0.6)",
+                    color: "#fff",
                     fontSize: 13,
+                    background: "rgba(0, 0, 0, 0.45)",
+                    backdropFilter: "blur(6px)",
+                    WebkitBackdropFilter: "blur(6px)",
+                    padding: "10px 16px",
+                    borderRadius: 999,
                   }}
                 >
                   Nächster Start · <strong style={{ color: "#fff" }}>13. Januar 2027</strong>

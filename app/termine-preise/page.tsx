@@ -152,6 +152,11 @@ export default async function TerminePage({
       <PageHero
         eyebrow="Termine & Preise"
         image={IMG.termine}
+        slides={[
+          { src: "/hero/hero-termine-flotte.jpg", alt: "VFR-Fahrzeugflotte mit SU-VR-Kennzeichen vor der Schule" },
+          { src: "/hero/hero-termine-fahnen.jpg", alt: "VFR-Beachflags vor dem Fuhrpark" },
+          { src: IMG.termine, alt: "Jahreskalender mit markierten Kursterminen" },
+        ]}
         title="Alle Kurse, transparent."
         lead="Termine und Verfügbarkeiten kommen direkt aus unserem Kursverwaltungssystem. Wähle deinen Kurs, buche sicher online und erhalte die Rechnung automatisch per Mail."
       />

@@ -135,6 +135,17 @@ export function ChatBubble() {
         setMessages((m) => [...m, { role: "assistant", content: json.reply }]);
       } else if (json.info) {
         setMessages((m) => [...m, { role: "assistant", content: json.info }]);
+      } else if (json.error) {
+        setMessages((m) => [...m, { role: "assistant", content: json.error }]);
+      } else {
+        setMessages((m) => [
+          ...m,
+          {
+            role: "assistant",
+            content:
+              "Hier ist leider etwas schiefgelaufen. Ruf uns an: +49 2208 919 626-0 oder schreib an info@vfr-gmbh.de.",
+          },
+        ]);
       }
     } catch {
       setMessages((m) => [
@@ -142,7 +153,7 @@ export function ChatBubble() {
         {
           role: "assistant",
           content:
-            "Der Chat ist gerade nicht erreichbar. Bitte nutze Telefon oder E-Mail.",
+            "Verbindung unterbrochen. Bitte nochmal versuchen oder uns direkt anrufen: +49 2208 919 626-0.",
         },
       ]);
     } finally {
